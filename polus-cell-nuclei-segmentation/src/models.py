@@ -1,40 +1,44 @@
-import argparse, subprocess, logging, time
-from pathlib import Path
+import argparse
+import subprocess
+import topcoders
+import unet
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-BATCH_SIZE = 20
+from pathlib import Path
 
 def main():
     
-    # Initialize the logger
-    logging.basicConfig(format='%(asctime)s - %(name)-8s - %(levelname)-8s - %(message)s',
-                        datefmt='%d-%b-%y %H:%M:%S')
-    logger = logging.getLogger("main")
-    logger.setLevel(logging.INFO)
+    """This is the main function to execute the Nuclei Segmentation Plugin. The plugin
+       takes 3 inputs : 
+       inpDir: The input directory consisting of the input image collection
+       outDir: The output directory where the plugin writes the output 
+       model: The name of the model which the user wants to use"""
     
-    # Parse the inputs
+
+    # parse the inputs
     parser=argparse.ArgumentParser()
     parser.add_argument('--inpDir',dest='input_directory',type=str,required=True)
     parser.add_argument('--outDir',dest='output_directory',type=str,required=True)
-    args = parser.parse_args()
+    parser.add_argument('--model',dest='model_name',type=str,required=True)
     
-    # Input and output directory
-    input_dir = args.input_directory
-    logger.info("input_dir: {}".format(input_dir))
-    output_dir = args.output_directory
-    logger.info("output_dir: {}".format(output_dir))
     
-    # Get a list of images
-    files = [str(f.absolute()) for f in Path(input_dir).iterdir()]
+    # store the input directory, output directory and model name
+    args = parser.parse_args()    
+    input_dir = str(Path(args.input_directory).resolve())
+    output_dir = str(Path(args.output_directory).resolve())
+    model=args.model_name
+
     
-    # Loop over images, 20 at a time
-    for ind in range(0,len(files),BATCH_SIZE):
-        logger.info('{:.2f}% complete...'.format(100*ind/len(files)))
-        batch = ','.join(files[ind:min([ind+BATCH_SIZE,len(files)])])
-        process = subprocess.Popen("python3 segment.py --batch {} --outDir {}".format(batch,output_dir),shell=True)
-        while process.poll() == None:
-            time.sleep(1) # Put the main process to sleep inbetween checks, free up some processing power
-    logger.info('100% complete...')
+    # if else statement to execute the model chosen by the user
+    if model=="unet":
+        unet.execute_unet(input_dir,output_dir)
+    elif model=="topcoders":
+        topcoders.excecute_topcoders_workflow(input_dir,output_dir)   
+    else:
+        print("Wrong Model Name")
+        
 
 if __name__ == "__main__":
     main()
-    
+      

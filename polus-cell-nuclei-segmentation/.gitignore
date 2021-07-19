@@ -1,0 +1,16 @@
+.DS_Store
+
+/src/dsb2018_topcoders/albu/weights
+/src/dsb2018_topcoders/albu/results_test
+/src/dsb2018_topcoders/selim/nn_models
+/src/dsb2018_topcoders/victor/nn_models
+/src/dsb2018_topcoders/victor/lgbm_models
+/src/dsb2018_topcoders/data/folds.csv
+/src/dsb2018_topcoders/data_test
+/src/dsb2018_topcoders/predictions
+/src/dsb2018_topcoders/selim/models/ResNet-101-model.keras.h5
+/src/dsb2018_topcoders/selim/models/ResNet-152-model.keras.h5
+
+
+
+*__pycache__
