@@ -1,0 +1,217 @@
+{
+    "name": "SMP Training",
+    "version": "0.1.3debug4",
+    "title": "SMP Training",
+    "description": "Segmentation models training plugin",
+    "author": "Gauhar Bains (gauhar.bains@labshare.org)",
+    "institution": "National Center for Advancing Translational Sciences, National Institutes of Health",
+    "repository": "https://github.com/labshare/polus-plugins",
+    "website": "https://ncats.nih.gov/preclinical/core/informatics",
+    "citation": "",
+    "containerId": "labshare/polus-smp-training-plugin:0.1.3debug4",
+    "inputs": [
+      {
+        "name": "pretrainedModel",
+        "type": "genericData",
+        "description": "Pretrained model path",
+        "required": true
+      },
+      {
+        "name": "segmentationType",
+        "type": "enum",
+        "options": {
+          "values": [
+              "Binary",
+              "Cellpose"
+          ]
+      },
+        "description": "Type of segmentation",
+        "required": true
+      },
+      {
+        "name": "modelName",
+        "type": "enum",
+        "options": {
+          "values": [
+              "unet",
+              "unetpp",
+              "Linknet",
+              "FPN",
+              "PSPNet",
+              "PAN",
+              "DeepLabV3",
+              "DeepLabV3Plus"
+          ]
+      },
+        "description": "model to use",
+        "required": false
+      },
+      {
+        "name": "encoderName",
+        "type": "string",
+        "description": "encoder to use",
+        "required": false
+      },
+      {
+        "name": "encoderWeights",
+        "type": "enum",
+        "options": {
+          "values": [
+              "imagenet",
+              "random"
+          ]
+      },
+        "description": "Pretrained weights for the encoder",
+        "required": false
+      },
+      {
+        "name": "imagesPattern",
+        "type": "string",
+        "description": "Filename pattern for images",
+        "required": true
+      },
+      {
+        "name": "labelsPattern",
+        "type": "string",
+        "description": "Filename pattern for labels",
+        "required": true
+      },
+      {
+        "name": "imagesDir",
+        "type": "collection",
+        "description": "Collection containing images",
+        "required": true
+      },
+      {
+        "name": "labelsDir",
+        "type": "collection",
+        "description": "Collection containing labels",
+        "required": true
+      },
+      {
+        "name": "flowfieldDir",
+        "type": "genericData",
+        "description": "Collection containing flowfields",
+        "required": true
+      },
+      {
+        "name": "loss",
+        "type": "enum",
+        "options": {
+          "values": [
+              "Dice",
+              "Jaccard",
+              "MSE"
+          ]
+      },
+        "description": "Loss function to use",
+        "required": false
+      },
+      {
+        "name": "metric",
+        "type": "enum",
+        "options": {
+          "values": [
+              "IoU",
+              "Fscore",
+              "Precision",
+              "Accuracy",
+              "Recall"
+          ]
+      },
+        "description": "Performance metric to use",
+        "required": false
+      },
+      {
+        "name": "batchSize",
+        "type": "string",
+        "description": "Batch Size",
+        "required": false
+      },
+      {
+        "name": "trainValSplit",
+        "type": "number",
+        "description": "Train/validation data split ratio",
+        "required": false
+      }
+    ],
+    "outputs": [
+      {
+        "name": "outDir",
+        "type": "genericData",
+        "description": "Output model"
+      }
+    ],
+    "ui": [
+      {
+        "key": "inputs.segmentationType",
+        "title": "Segmentation Type",
+        "description": "Segmentation Type"
+      },
+      {
+        "key": "inputs.pretrainedModel",
+        "title": "Pre-Trained Model",
+        "description": "Pretrained model to use"
+      },
+      {
+        "key": "inputs.modelName",
+        "title": "Model Name",
+        "description": "model to use"
+      },
+      {
+        "key": "inputs.encoderName",
+        "title": "Encoder Name",
+        "description": "encoder to use"
+      },
+      {
+        "key": "inputs.encoderWeights",
+        "title": "Encoder Weights",
+        "description": "Pretrained weights for the encoder"
+      },
+      {
+        "key": "inputs.imagesPattern",
+        "title": "Images filename pattern",
+        "description": "Filename pattern for images"
+      },
+      {
+        "key": "inputs.labelsPattern",
+        "title": "Labels filename pattern",
+        "description": "Filename pattern for labels"
+      },
+      {
+        "key": "inputs.imagesDir",
+        "title": "Image collection",
+        "description": "Collection containing images"
+      },
+      {
+        "key": "inputs.labelsDir",
+        "title": "Labels collection",
+        "description": "Collection containing labels"
+      },
+      {
+        "key": "inputs.flowfieldDir",
+        "title": "Flowfield Dir",
+        "description": "Collection containing vector flow fields"
+      },
+      {
+        "key": "inputs.loss",
+        "title": "Loss",
+        "description": "Loss function to use"
+      },
+      {
+        "key": "inputs.metric",
+        "title": "Metric",
+        "description": "Performance metric"
+      },
+      {
+        "key": "inputs.batchSize",
+        "title": "Batch Size",
+        "description": "Batch Size"
+      },
+      {
+        "key": "inputs.trainValSplit",
+        "title": "Train/Val split",
+        "description": "Train/validation data split ratio"
+      }
+    ]
+  }
