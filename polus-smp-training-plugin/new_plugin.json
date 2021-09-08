@@ -1,0 +1,2697 @@
+{
+    "name": "SegmentationModelsTraining",
+    "version": "0.3.0debug1546",
+    "title": "SegmentationModelsTraining",
+    "description": "Segmentation models training plugin",
+    "author": "Gauhar Bains (gauhar.bains@labshare.org), Najib Ishaq (najib.ishaq@axleinfo.com)",
+    "institution": "National Center for Advancing Translational Sciences, National Institutes of Health",
+    "repository": "https://github.com/polus-au/polus-plugins-dl",
+    "website": "https://ncats.nih.gov/preclinical/core/informatics",
+    "citation": "",
+    "containerId": "labshare/polus-smp-training-plugin::0.3.0debug1546",
+    "inputs": {
+        "pretrainedModel": {
+            "description": "Path to a model that was previously trained with this plugin. If starting fresh, you must instead provide: 'modelName', 'encoderBase', 'encoderVariant', 'encoderWeights', and 'optimizerName'.See the README for available options.",
+            "type": "genericData",
+            "required": false
+        },
+        "modelName": {
+            "description": "Model architecture to use. Required if starting fresh.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": [
+                    "Unet",
+                    "UnetPlusPlus",
+                    "MAnet",
+                    "Linknet",
+                    "FPN",
+                    "PSPNet",
+                    "PAN",
+                    "DeepLabV3",
+                    "DeepLabV3Plus"
+                ]
+            }
+        },
+        "encoderBase": {
+            "description": "Base encoder to use. Required if starting fresh.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": [
+                    "ResNet",
+                    "ResNeXt",
+                    "ResNeSt",
+                    "Res2Ne(X)t",
+                    "RegNet(x/y)",
+                    "GERNet",
+                    "SE-Net",
+                    "SK-ResNe(X)t",
+                    "DenseNet",
+                    "Inception",
+                    "EfficientNet",
+                    "MobileNet",
+                    "DPN",
+                    "VGG"
+                ]
+            }
+        },
+        "encoderVariant": {
+            "description": "Encoder Variant to use. Required if starting fresh.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": []
+            }
+        },
+        "encoderWeights": {
+            "description": "Name of dataset with which the model was pretrained. Required if starting fresh.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": []
+            }
+        },
+        "optimizerName": {
+            "description": "Name of optimization algorithm to use for training the model. Required if starting fresh.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": [
+                    "Adadelta",
+                    "Adagrad",
+                    "Adam",
+                    "AdamW",
+                    "SparseAdam",
+                    "Adamax",
+                    "ASGD",
+                    "LBFGS",
+                    "RMSprop",
+                    "Rprop",
+                    "SGD"
+                ]
+            }
+        },
+        "batchSize": {
+            "description": "Size of each batch for training. If left unspecified, we will automatically use the largest possible size based on the model architecture and GPU memory.",
+            "type": "number",
+            "required": false
+        },
+        "imagesDir": {
+            "description": "Collection containing images.",
+            "type": "collection",
+            "required": true
+        },
+        "imagesPattern": {
+            "description": "Filename pattern for images.",
+            "type": "string",
+            "required": true
+        },
+        "labelsDir": {
+            "description": "Collection containing labels, i.e. the ground-truth, for the images.",
+            "type": "collection",
+            "required": true
+        },
+        "labelsPattern": {
+            "description": "Filename pattern for labels.",
+            "type": "string",
+            "required": true
+        },
+        "trainFraction": {
+            "description": "Fraction of dataset to use for training.",
+            "type": "number",
+            "required": true
+        },
+        "lossName": {
+            "description": "Name of loss function to use.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": [
+                    "JaccardLoss",
+                    "DiceLoss",
+                    "TverskyLoss",
+                    "FocalLoss",
+                    "LovaszLoss",
+                    "SoftBCEWithLogitsLoss",
+                    "SoftCrossEntropyLoss"
+                ]
+            }
+        },
+        "metricName": {
+            "description": "Name of performance metric to track.",
+            "type": "enum",
+            "required": false,
+            "options": {
+                "values": [
+                    "IoU",
+                    "Fscore",
+                    "Accuracy",
+                    "Recall",
+                    "Precision"
+                ]
+            }
+        },
+        "maxEpochs": {
+            "description": "Maximum number of epochs for which to continue training the model.",
+            "type": "number",
+            "required": false
+        },
+        "patience": {
+            "description": "Maximum number of epochs to wait for model to improve.",
+            "type": "number",
+            "required": false
+        },
+        "minDelta": {
+            "description": "Minimum improvement in loss to reset patience.",
+            "type": "number",
+            "required": false
+        }
+    },
+    "outputs": [
+        {
+            "name": "outputDir",
+            "type": "genericData",
+            "description": "Output model"
+        }
+    ],
+    "ui": [
+        {
+            "key": "inputs.pretrainedModel",
+            "title": "pretrainedModel",
+            "description": "Path to a model that was previously trained with this plugin. If starting fresh, you must instead provide: 'modelName', 'encoderBase', 'encoderVariant', 'encoderWeights', and 'optimizerName'.See the README for available options."
+        },
+        {
+            "key": "inputs.modelName",
+            "title": "modelName",
+            "description": "Model architecture to use. Required if starting fresh."
+        },
+        {
+            "key": "inputs.encoderBase",
+            "title": "encoderBase",
+            "description": "Base encoder to use. Required if starting fresh."
+        },
+        {
+            "key": "inputs.encoderVariant",
+            "title": "encoderVariant",
+            "description": "Encoder Variant to use. Required if starting fresh.",
+            "validator": [
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "ResNet",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnet18"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnet34"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnet50"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnet101"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnet152"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "ResNeXt",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext50_32x4d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext101_32x4d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext101_32x8d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext101_32x16d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext101_32x32d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "resnext101_32x48d"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "ResNeSt",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest14d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest26d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest50d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest101e"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest200e"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest269e"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest50d_4s2x40d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-resnest50d_1s4x24d"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "Res2Ne(X)t",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net50_26w_4s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net101_26w_4s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net50_26w_6s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net50_26w_8s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net50_48w_2s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2net50_14w_8s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-res2next50"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "RegNet(x/y)",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_002"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_004"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_006"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_008"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_016"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_032"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_040"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_064"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_080"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_120"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_160"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnetx_320"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_002"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_004"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_006"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_008"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_016"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_032"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_040"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_064"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_080"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_120"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_160"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-regnety_320"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "GERNet",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-gernet_s"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-gernet_m"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-gernet_l"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "SE-Net",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "senet154"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "se_resnet50"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "se_resnet101"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "se_resnet152"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "se_resnext50_32x4d"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "se_resnext101_32x4d"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "SK-ResNe(X)t",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-skresnet18"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-skresnet34"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-skresnext50_32x4d"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "DenseNet",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "densenet121"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "densenet169"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "densenet201"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "densenet161"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "Inception",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "inceptionresnetv2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "inceptionv4"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "xception"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "EfficientNet",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b0"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b1"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b3"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b4"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b5"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b6"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "efficientnet-b7"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b0"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b1"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b3"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b4"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b5"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b6"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b7"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-b8"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-l2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-lite0"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-lite1"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-lite2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-lite3"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-efficientnet-lite4"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "MobileNet",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "mobilenet_v2"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_large_075"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_large_100"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_large_minimal_100"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_small_075"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_small_100"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "timm-mobilenetv3_small_minimal_100"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "DPN",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn68"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn68b"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn92"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn98"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn107"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "dpn131"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderBase",
+                        "value": "VGG",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg11"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg11_bn"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg13"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg13_bn"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg16"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg16_bn"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg19"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderVariant",
+                            "value": "vgg19_bn"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "inputs.encoderWeights",
+            "title": "encoderWeights",
+            "description": "Name of dataset with which the model was pretrained. Required if starting fresh.",
+            "validator": [
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnet18",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnet34",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnet50",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnet101",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnet152",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext50_32x4d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext101_32x4d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext101_32x8d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "instagram"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext101_32x16d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "instagram"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "ssl"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "swsl"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext101_32x32d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "instagram"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "resnext101_32x48d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "instagram"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest14d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest26d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest50d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest101e",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest200e",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest269e",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest50d_4s2x40d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-resnest50d_1s4x24d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net50_26w_4s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net101_26w_4s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net50_26w_6s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net50_26w_8s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net50_48w_2s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2net50_14w_8s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-res2next50",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_002",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_004",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_006",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_008",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_016",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_032",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_040",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_064",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_080",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_120",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_160",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnetx_320",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_002",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_004",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_006",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_008",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_016",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_032",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_040",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_064",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_080",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_120",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_160",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-regnety_320",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-gernet_s",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-gernet_m",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-gernet_l",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "senet154",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "se_resnet50",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "se_resnet101",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "se_resnet152",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "se_resnext50_32x4d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "se_resnext101_32x4d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-skresnet18",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-skresnet34",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-skresnext50_32x4d",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "densenet121",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "densenet169",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "densenet201",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "densenet161",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "inceptionresnetv2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet+background"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "inceptionv4",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet+background"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "xception",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b0",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b1",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b3",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b4",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b5",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b6",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "efficientnet-b7",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b0",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b1",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b3",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b4",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b5",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b6",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b7",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-b8",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        },
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "advprop"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-l2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "noisy-student"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-lite0",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-lite1",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-lite2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-lite3",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-efficientnet-lite4",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "mobilenet_v2",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_large_075",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_large_100",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_large_minimal_100",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_small_075",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_small_100",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "timm-mobilenetv3_small_minimal_100",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn68",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn68b",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet+5k"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn92",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet+5k"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn98",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn107",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet+5k"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "dpn131",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg11",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg11_bn",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg13",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg13_bn",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg16",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg16_bn",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg19",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                },
+                {
+                    "condition": {
+                        "input": "encoderWeights",
+                        "value": "vgg19_bn",
+                        "eval": "=="
+                    },
+                    "then": [
+                        {
+                            "action": "add",
+                            "input": "encoderWeights",
+                            "value": "imagenet"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "inputs.optimizerName",
+            "title": "optimizerName",
+            "description": "Name of optimization algorithm to use for training the model. Required if starting fresh."
+        },
+        {
+            "key": "inputs.batchSize",
+            "title": "batchSize",
+            "description": "Size of each batch for training. If left unspecified, we will automatically use the largest possible size based on the model architecture and GPU memory."
+        },
+        {
+            "key": "inputs.imagesDir",
+            "title": "imagesDir",
+            "description": "Collection containing images."
+        },
+        {
+            "key": "inputs.imagesPattern",
+            "title": "imagesPattern",
+            "description": "Filename pattern for images."
+        },
+        {
+            "key": "inputs.labelsDir",
+            "title": "labelsDir",
+            "description": "Collection containing labels, i.e. the ground-truth, for the images."
+        },
+        {
+            "key": "inputs.labelsPattern",
+            "title": "labelsPattern",
+            "description": "Filename pattern for labels."
+        },
+        {
+            "key": "inputs.trainFraction",
+            "title": "trainFraction",
+            "description": "Fraction of dataset to use for training."
+        },
+        {
+            "key": "inputs.lossName",
+            "title": "lossName",
+            "description": "Name of loss function to use."
+        },
+        {
+            "key": "inputs.metricName",
+            "title": "metricName",
+            "description": "Name of performance metric to track."
+        },
+        {
+            "key": "inputs.maxEpochs",
+            "title": "maxEpochs",
+            "description": "Maximum number of epochs for which to continue training the model."
+        },
+        {
+            "key": "inputs.patience",
+            "title": "patience",
+            "description": "Maximum number of epochs to wait for model to improve."
+        },
+        {
+            "key": "inputs.minDelta",
+            "title": "minDelta",
+            "description": "Minimum improvement in loss to reset patience."
+        }
+    ]
+}

@@ -1,6 +1,8 @@
 # SMP Training
 
-This WIPP plugin uses the [segmentation models pytorch](https://github.com/qubvel/segmentation_models.pytorch) toolkit to train models for image segmentation. The toolkit is a high level API consisting of 9 models architectures for binary and multiclass segmentation. There are more than a 100 available encoders with pre-trained wieghts which can be used as backbones for these arcitectures. 
+This WIPP plugin uses the [segmentation models pytorch](https://github.com/qubvel/segmentation_models.pytorch) toolkit to train models for image segmentation.
+The toolkit is a high level API consisting of 9 models architectures for binary and multiclass segmentation.
+There are more than 100 available encoders with pre-trained weights which can be used as backbones for these architectures. 
   
 Contact [Gauhar Bains](mailto:gauhar.bains@labshare.org) or [Nick Schaub](mailto:nick.schaub@labshare.org) for more information.
 For more information on WIPP, visit the [official WIPP page](https://isg.nist.gov/deepzoomweb/software/wipp).
@@ -8,19 +10,22 @@ For more information on WIPP, visit the [official WIPP page](https://isg.nist.go
 ## Core Functionality
 The details and usage of the plugin is provided in the section below. 
  
-- **Binary Segmentation**: The plugin can be use to train models for binary segmentation. To do this, select segmentationType as Binary and provide path to the binary labels in `labelsDir`.
-- **Cellpose Segmnetation**: This functionality is still a work in progress. To enable the plugin to train models for cellpose type segmentation, select segmentationType as Cellpose and provide path to ground truth vectors in `flowfieldDir`. 
-- **Train pre-trained models**: Models previously trained and saved using this plugin can be fed into this plugin to continue training. This can be done for both binary and cellpose type segmentation. Provide path to the pre-trained model in `preTrainedModel`. 
-
+- **Binary Segmentation**: The plugin can be used to train models for binary segmentation.
+  To do this, select segmentationType as Binary and provide path to the binary labels in `labelsDir`.
+- **Cellpose Segmentation**: This functionality is still a work in progress.
+  To enable the plugin to train models for cellpose type segmentation, select segmentationType as `"Cellpose"` and provide path to ground truth vectors in `flowfieldDir`. 
+- **Train pre-trained models**: Models previously trained and saved using this plugin can be fed into this plugin to continue training.
+  This can be done for both binary and cellpose type segmentation.
+  Provide path to the pre-trained model in `preTrainedModel`.
 
 ## Building
 
-To build the Docker image for the conversion plugin, run
-`./build-docker.sh`.
+To build the Docker image for the conversion plugin, run `./build-docker.sh`.
 
 ## Install WIPP Plugin
 
-If WIPP is running, navigate to the plugins page and add a new plugin. Paste the contents of `plugin.json` into the pop-up window and submit.
+If WIPP is running, navigate to the plugins page and add a new plugin.
+Paste the contents of `plugin.json` into the pop-up window and submit.
 
 ## Options
 
